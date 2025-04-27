@@ -7,6 +7,7 @@ using namespace std;
 
 int main()
 {
-	cout << "Hello CMake." << endl;
-	return 0;
+	Board board = Board(3);
+
+	std::cout << board.ToString();
 }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #define number uint8_t
 
 
@@ -27,6 +28,17 @@ public:
 	/// <summary> Removes number in section[col][row] at position [section_y][section_x] </summary>
 	/// <returns> <para>true -> if everything went ok</para> false -> if number tile was empty</returns>
 	bool RemoveNumber(const int& row, const int& col, const int& section_x, const int& section_y);
+
+	/// <summary>Saves board to string, which later can be displayed or saved to file</summary>
+	std::string ToString();
+
+	/// <summary>Tries to load board from given string, spaces are ignored</summary>
+	/// <returns> <para>true -> if everything went ok</para> false -> if string was incorrect (had foribidden symbols/wrong format)</returns>
+	bool FromString(std::string board);
+
+	/// <summary>Tries to load board from given stream (file, input, stringstream, etc...), spaces are ignored</summary>
+	/// <returns> <para>true -> if everything went ok</para> false -> if string was incorrect (had foribidden symbols/wrong format)</returns>
+	bool FromStream(std::istream& stream);
 
 private:
 

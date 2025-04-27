@@ -40,6 +40,55 @@ bool Board::RemoveNumber(const int& row, const int& col, const int& section_x, c
 	return true;
 }
 
+std::string Board::ToString()
+{
+	/*TODO: if section would be greater than 3x3 padding is not added, only single digit numbers are supported*/
+
+	std::string out;
+	const int GLOBAL_SIZE = _size * Section::SECTION_SIZE;       
+
+	for (int global_row = 0; global_row < GLOBAL_SIZE; global_row++)
+	{
+		//horizontal padding
+		if (global_row > 0 && global_row % Section::SECTION_SIZE == 0)
+			out += "\n";
+
+		for (int global_col = 0; global_col < GLOBAL_SIZE; global_col++) //treat board as 2 dimensional instead of having sections
+		{
+			// vertical padding
+			if (global_col > 0 && global_col % Section::SECTION_SIZE == 0)
+				out += "  "; // 2 spaces
+
+			//calculate section coordinates, and in_section coordinates
+			int section_row = global_row / Section::SECTION_SIZE;
+			int in_sec_row = global_row % Section::SECTION_SIZE;
+
+			int section_col = global_col / Section::SECTION_SIZE;
+			int in_sec_col = global_col % Section::SECTION_SIZE;
+
+			int val = _board[section_row][section_col].numbers[in_sec_row][in_sec_col];
+
+			if (val == EMPTY_TILE)
+				out += ". ";
+			else
+				out += std::to_string(val) + " ";
+		}
+		out += "\n";
+	}
+
+	return out;
+}
+
+bool Board::FromString(std::string board)
+{
+	return false;
+}
+
+bool Board::FromStream(std::istream& stream)
+{
+	return false;
+}
+
 bool Board::IsSafe(const int& row, const int& col, const int& section_x, const int& section_y, const number& num)
 {
 	//EDGE CASE: there is already number
