@@ -4,6 +4,6 @@
 #pragma once
 
 #include <iostream>
-#include "Game/Board.h"
+#include "Game/SudokuGame.h"
 
 // TODO: W tym miejscu przywołaj dodatkowe nagłówki wymagane przez program.

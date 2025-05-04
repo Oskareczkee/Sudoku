@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-	Board board = Board(3);
+	SudokuGame game;
 
-	std::cout << board.ToString();
+	game.MainMenu();
 }

@@ -24,19 +24,31 @@ bool Board::PutNumber(const int& row, const int& col, const int& section_x, cons
 		return false;
 
 	if (IsSafe(row, col, section_x, section_y, num)) {
-		this->_board[row][col].numbers[section_x][section_y] = num;
+		this->_board[row][col].numbers[section_y][section_x] = num;
 		return true;
 	}
 
 	return false;
 }
 
+bool Board::CheckWin()
+{
+	for (int x = 0; x < _size; x++)
+		for (int y = 0; y < _size; y++) //for each section
+			for (int xs = 0; xs < Section::SECTION_SIZE; xs++)
+				for (int ys = 0; ys < Section::SECTION_SIZE; ys++) //for each col,row in section
+					if (this->_board[x][y].numbers[xs][ys] == EMPTY_TILE) //board is not filled, empty tile was found
+						return false;
+
+	return true;
+}
+
 bool Board::RemoveNumber(const int& row, const int& col, const int& section_x, const int& section_y)
 {
-	if (this->_board[row][col].numbers[section_x][section_y] == EMPTY_TILE) //tile is empty
+	if (this->_board[row][col].numbers[section_y][section_x] == EMPTY_TILE) //tile is empty
 		return false;
 
-	this->_board[row][col].numbers[section_x][section_y] = EMPTY_TILE;
+	this->_board[row][col].numbers[section_y][section_x] = EMPTY_TILE;
 	return true;
 }
 
@@ -79,9 +91,52 @@ std::string Board::ToString()
 	return out;
 }
 
-bool Board::FromString(std::string board)
+std::string Board::ToFlatString()
 {
-	return false;
+	std::string out;
+
+	for (int x = 0; x < _size; x++)
+		for (int y = 0; y < _size; y++)
+			for (int sx = 0; Section::SECTION_SIZE; sx++)
+				for (int sy = 0; Section::SECTION_SIZE; sy++)
+					out += _board[x][y].numbers[sx][sy];
+
+	return out;
+}
+
+bool Board::FromString(const std::string& board)
+{
+	const int totalTiles = _size * _size * Section::SECTION_SIZE * Section::SECTION_SIZE;
+
+	if (board.length() != totalTiles) {
+		std::cerr << "Invalid board string length: expected " << totalTiles << ", got " << board.length() << "\n";
+		return false;
+	}
+
+	int index = 0;
+
+	for (int sectionRow = 0; sectionRow < _size; sectionRow++) {
+		for (int sectionCol = 0; sectionCol < _size; sectionCol++) {
+			for (int tileRow = 0; tileRow < Section::SECTION_SIZE; tileRow++) {
+				for (int tileCol = 0; tileCol < Section::SECTION_SIZE; tileCol++) {
+
+					while (std::isspace(board[index])) //skip whitespaces
+						index++;
+
+					char ch = board[index++];
+					if (ch < '0' || ch > '9') {
+						std::cerr << "Invalid character in board string: '" << ch << "'\n";
+						return false;
+					}
+
+					int value = ch - '0'; //'-0' converts character into digit
+					_board[sectionRow][sectionCol].numbers[tileRow][tileCol] = value;
+				}
+			}
+		}
+	}
+
+	return true;
 }
 
 bool Board::FromStream(std::istream& stream)
@@ -110,6 +165,12 @@ bool Board::IsSafe(const int& row, const int& col, const int& section_x, const i
 			if (_board[x][col].numbers[y][section_x] == num)
 				return false;
 	}
+
+	//check if number is already in given section
+	for (int x = 0; x < _size; x++)
+		for (int y = 0; y < _size; y++)
+			if (_board[row][col].numbers[x][y] == num)
+				return false;
 
 	return true;
 }
