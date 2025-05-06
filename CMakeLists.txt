@@ -12,7 +12,7 @@ endif()
 project ("Sudoku")
 
 # Dodaj źródło do pliku wykonywalnego tego projektu.
-add_executable (Sudoku "Sudoku.cpp" "Sudoku.h" "Game/Board.h" "Game/Board.cpp" "Game/SudokuGame.h" "Game/Player.h" "Game/Defaults.h" "Game/Player.cpp" "Game/SudokuGame.cpp")
+add_executable (Sudoku "Sudoku.cpp" "Sudoku.h" "Game/Board.h" "Game/Board.cpp" "Game/SudokuGame.h" "Game/Player/Player.h" "Game/Defaults.h" "Game/Player/Player.cpp" "Game/SudokuGame.cpp"  "Game/Player/PlayerBase.h" "Game/Player/AIPlayer.h" "Game/Player/AIPlayer.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Sudoku PROPERTY CXX_STANDARD 20)

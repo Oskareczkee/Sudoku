@@ -1,3 +1,4 @@
+#pragma once
 #include "SudokuGame.h"
 
 void SudokuGame::MainMenu()
@@ -99,7 +100,13 @@ void SudokuGame::NewGame()
         std::cout << "Input name for player " << x + 1 << ":\n";
         std::cin >> name;
 
-        player_queue.emplace_front(name); //emplace calls constructor directly in container
+        auto& p = player_queue.emplace_front(name); //emplace calls constructor directly in container
+        if (!p.GetBoardRef().GenerateRandomBoard(Defaults::DEFAULT_CLUES))//generate random board for this player
+        {
+            std::cerr << "[Critical] -> Board could not be generated for player: " << name << "\n";
+            PressEnter();
+            exit(0);
+        }
     }
 
     this->GameLoop();
@@ -144,6 +151,7 @@ bool SudokuGame::LoadGame(const std::string& filename)
 void SudokuGame::GameLoop()
 {
     const int totalPlayers = player_queue.size();
+    bool switch_player = false;
 
     while(true){
 
@@ -151,15 +159,17 @@ void SudokuGame::GameLoop()
         Player& player = player_queue.at(this->current_player);
         Board& board = player.GetBoardRef();
 
+        ClearScreen();
         std::cout << "\n=== Player " << player.GetName() << "'s Turn ===\n";
         std::cout<<board.ToString()<<"\n"; // assuming `board` is the current game board
 
         std::cout << "Choose action:\n";
         std::cout << "1. Make a move\n";
         std::cout << "2. Remove a number\n";
-        std::cout << "3. Save game\n";
-        std::cout << "4. Load game\n";
-        std::cout << "5. Quit\n";
+        std::cout << "3. AI random move\n";
+        std::cout << "4. Save game\n";
+        std::cout << "5. Load game\n";
+        std::cout << "6. Quit\n";
         std::cout << "Enter option: ";
 
         int option;
@@ -183,10 +193,12 @@ void SudokuGame::GameLoop()
                 ClearScreen();
             }
 
-            if (board.PutNumber(row-1, col-1, section_x-1, section_y-1,num)) //sections and tiles are 1-indexed
-                this->current_player = (this->current_player + 1) % totalPlayers;
-            else
+            if (board.PutNumber(row - 1, col - 1, section_x - 1, section_y - 1, num)) //sections and tiles are 1-indexed
+                switch_player = true;
+            else {
                 std::cout << "Invalid move. Try again\n";
+                PressEnter();
+            }
             break;
         }
 
@@ -197,35 +209,65 @@ void SudokuGame::GameLoop()
             }
 
             if (board.RemoveNumber(row - 1, col - 1, section_x - 1, section_y - 1)) //sections and tiles are 1-indexed
-                this->current_player = (this->current_player + 1) % totalPlayers;
+                switch_player = true;
             else
                 std::cout << "Number could not be removed. Try again\n";
             break;
         }
 
-        case 3: {
+        case 3: { //AI random move
+            AIMove();
+            std::cout << "Move was successfully done!\n";
+            PressEnter();
+            switch_player = true;
+            break;
+        }
+
+        case 4: {
             // Save game
-            if (SaveGame("test_save.save"))
+            if (SaveGame("test_save.save")) {
                 std::cout << "Game saved successfully.\n";
-            else
+                PressEnter();
+            }
+            else {
                 std::cout << "Failed to save game.\n";
+                PressEnter();
+            }
 
             break;
         }
 
-        case 4: // Load game
+        case 5: // Load game
             if (LoadGame("test_save.save")) {
                 std::cout << "Game loaded successfully.\n";
+                PressEnter();
             }
             else {
                 std::cout << "Failed to load game.\n";
+                PressEnter();
             }
             break;
+
+        case 6: {
+            std::cout << "Exiting game...\n";
+            PressEnter();
+            exit(0);
+        }
 
         default:
             std::cout << "Invalid option. Try again.\n";
             break;
         }
+
+        if (player.GetBoardRef().CheckWin()) {
+            std::cout << "Congratulations " << player.GetName() << "\nYou have won!\n";
+            PressEnter();
+            break; //out of the loop
+        }
+
+
+        if(switch_player)
+            this->current_player = (this->current_player + 1) % totalPlayers;
     }
 }
 
@@ -296,6 +338,14 @@ bool SudokuGame::GetRemoveInfo(Board& board, int& row, int& col, int& section_x,
         return false;
 
     return true;
+}
+
+void SudokuGame::AIMove()
+{
+    Player& player = player_queue[current_player];
+    AIPlayer ai(player.GetName() + "_AI", player.GetBoardShared());
+
+    ai.MakeMove();
 }
 
 void SudokuGame::ClearScreen()

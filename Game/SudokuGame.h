@@ -1,6 +1,8 @@
+#pragma once
 #include <deque>
 #include <fstream>
-#include "Player.h"
+#include "Player/Player.h"
+#include "Player/AIPlayer.h"
 
 class SudokuGame {
 private:
@@ -41,6 +43,9 @@ private:
 	/// <summary>Shows prompt to get info for tile removal and saves it into variables</summary>
 	/// <returns><para>true -> if input was ok</para>false -> otherwise</returns>
 	bool GetRemoveInfo(Board& board, int& row, int& col, int& section_x, int& section_y);
+
+	/// <summary>Makes random move by AI</summary>
+	void AIMove();
 
 	void ClearScreen();
 	void PressEnter();
